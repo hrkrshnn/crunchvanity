@@ -493,6 +493,7 @@ dependencies = [
 name = "crunchvanity"
 version = "0.1.0"
 dependencies = [
+ "bytes",
  "ethers",
  "eyre",
  "hex",
