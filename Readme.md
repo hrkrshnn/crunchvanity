@@ -5,7 +5,7 @@ forge build
 cargo run --release
 ```
 
-Runs in around 3 minutes on a 32 core machine with the following output.
+Runs in around 3 minutes on an "AMD Ryzen 9 5950X" machine with the following output.
 
 ```
 i: 3530822108198443567
@@ -13,3 +13,5 @@ signature: 0x33353330383232313038313938343433353637
 ABI encoding: "1626ba7e19bb34e293bba96bf0caeea54cdd3d2dad7fdf44cbea855173fa84534fcfb528000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000133335333038323231303831393834343335363700000000000000000000000000"
 sha256: 1626ba7ee4d51fc0ebbbe277ee6a4093bafbeebd091f739897f29ebec25f476a
 ```
+
+Note: running the search from `0` to `UINT32_MAX` did not find the number--`UINT64_MAX` is really needed.
