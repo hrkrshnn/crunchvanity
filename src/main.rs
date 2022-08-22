@@ -7,10 +7,9 @@ use hex;
 
 use rayon::prelude::*;
 
-abigen!(
-    VanityContract,
-    "./out/VanityContract.sol/VanityContract.json"
-);
+// Generates the binding `IsValidSignatureCall`
+// Need to run `forge build` before `cargo build`.
+abigen!(VanityContract, "./out/IERC1271.sol/IERC1271.json");
 
 fn to_signature(i: u64) -> Bytes {
     let signature: Vec<u8> = format!("{}", i).as_bytes().into();
@@ -22,6 +21,8 @@ fn abi_encode(hash: [u8; 32], signature: Bytes) -> Vec<u8> {
 }
 
 fn main() {
+    // >>> cast keccak "CHALLENGE_MAGIC"
+    // 0x19bb34e293bba96bf0caeea54cdd3d2dad7fdf44cbea855173fa84534fcfb528
     let hash: [u8; 32] =
         hex::decode("19bb34e293bba96bf0caeea54cdd3d2dad7fdf44cbea855173fa84534fcfb528")
             .unwrap()
@@ -31,6 +32,8 @@ fn main() {
     let res = (0..u64::MAX).into_par_iter().find_any(|i| {
         let signature = to_signature(*i);
         let digest = digest_bytes(&abi_encode(hash, signature));
+        // >>> cast sig "isValidSignature(bytes32,bytes)"
+        // 0x1626ba7e
         digest[..8] == String::from("1626ba7e")
     });
 
