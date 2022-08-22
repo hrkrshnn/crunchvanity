@@ -1,6 +1,7 @@
 A cruncher for Vanity.
 
 ```
+forge build
 cargo run --release
 ```
 
