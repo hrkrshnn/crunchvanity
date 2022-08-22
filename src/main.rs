@@ -9,7 +9,7 @@ use rayon::prelude::*;
 
 // Generates the binding `IsValidSignatureCall`
 // Need to run `forge build` before `cargo build`.
-abigen!(VanityContract, "./out/IERC1271.sol/IERC1271.json");
+abigen!(IERC1271, "./out/IERC1271.sol/IERC1271.json");
 
 fn to_signature(i: u64) -> Bytes {
     let signature: Vec<u8> = format!("{}", i).as_bytes().into();
