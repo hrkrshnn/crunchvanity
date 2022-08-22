@@ -1,43 +1,48 @@
+use ethers::abi::AbiEncode;
 use ethers::prelude::*;
-use ethers::abi::{AbiEncode};
 
-use eyre::Result;
+use sha256::digest_bytes;
 
-use sha256::{, digest_bytes};
+use hex;
 
 use rayon::prelude::*;
 
-abigen!(VanityContract, "./out/VanityContract.sol/VanityContract.json");
+abigen!(
+    VanityContract,
+    "./out/VanityContract.sol/VanityContract.json"
+);
 
-fn main() -> Result<()> {
-    let hash: [u8; 32] = hex::decode("19bb34e293bba96bf0caeea54cdd3d2dad7fdf44cbea855173fa84534fcfb528")?.try_into().unwrap();
-    let selector: [u8; 4] = hex::decode("1626ba7e")?.try_into().unwrap();
+fn to_signature(i: u64) -> Bytes {
+    let signature: Vec<u8> = format!("{}", i).as_bytes().into();
+    Bytes::from(signature)
+}
 
-    let res = (0..u64::MAX).into_par_iter().
-        find_any(|i| {
-            let signature = format!("{}",i);
-            let signature: Vec<u8> = signature.as_bytes().into();
-            let signature = Bytes::from(signature);
-            let x = IsValidSignatureCall::encode(
-                IsValidSignatureCall
-                {
-                    hash,
-                    signature: signature.clone()
-                });
+fn abi_encode(hash: [u8; 32], signature: Bytes) -> Vec<u8> {
+    IsValidSignatureCall { hash, signature }.encode()
+}
 
-            let digest = digest_bytes(&x);
-            if digest[..8] == String::from("1626ba7e") {
-                println!("i: {}", i);
-                println!("signature: {}", signature);
-                println!("digest: {}", digest);
-                true
-            }
-            else {
-                false
-            }
+fn main() {
+    let hash: [u8; 32] =
+        hex::decode("19bb34e293bba96bf0caeea54cdd3d2dad7fdf44cbea855173fa84534fcfb528")
+            .unwrap()
+            .try_into()
+            .unwrap();
 
-        });
+    let res = (0..u64::MAX).into_par_iter().find_any(|i| {
+        let signature = to_signature(*i);
+        let digest = digest_bytes(&abi_encode(hash, signature));
+        digest[..8] == String::from("1626ba7e")
+    });
 
-    println!("{:?}", res);
-    Ok(())
+    if let Some(i) = res {
+        println!("i: {}", i);
+        let signature = to_signature(i);
+        let abi_encoding = abi_encode(hash, signature.clone());
+        let digest = digest_bytes(&abi_encoding);
+        println!("signature: {}", signature);
+        println!("ABI encoding: {:?}", hex::encode(abi_encoding));
+        println!("sha256: {}", digest);
+    } else {
+        println!("Crunching failed. Bigger range?");
+    }
 }
