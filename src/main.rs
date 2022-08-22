@@ -1,11 +1,8 @@
 use ethers::abi::AbiEncode;
+use ethers::core::utils::hex;
 use ethers::prelude::*;
-
-use sha256::digest_bytes;
-
-use hex;
-
 use rayon::prelude::*;
+use sha2::Digest;
 
 // Generates the binding `IsValidSignatureCall`
 // Need to run `forge build` before `cargo build`.
@@ -29,19 +26,20 @@ fn main() {
             .try_into()
             .unwrap();
 
+    // >>> cast sig "isValidSignature(bytes32,bytes)"
+    // 0x1626ba7e
+    let sig = hex::decode("1626ba7e").unwrap();
     let res = (0..u64::MAX).into_par_iter().find_any(|i| {
         let signature = to_signature(*i);
-        let digest = digest_bytes(&abi_encode(hash, signature));
-        // >>> cast sig "isValidSignature(bytes32,bytes)"
-        // 0x1626ba7e
-        digest[..8] == String::from("1626ba7e")
+        let digest = sha2::Sha256::digest(&abi_encode(hash, signature));
+        digest.starts_with(&sig[..])
     });
 
     if let Some(i) = res {
         println!("i: {}", i);
         let signature = to_signature(i);
         let abi_encoding = abi_encode(hash, signature.clone());
-        let digest = digest_bytes(&abi_encoding);
+        let digest = hex::encode(sha2::Sha256::digest(&abi_encoding));
         println!("signature: {}", signature);
         println!("ABI encoding: {:?}", hex::encode(abi_encoding));
         println!("sha256: {}", digest);
