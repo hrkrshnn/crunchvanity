@@ -11,9 +11,10 @@ use rayon::prelude::*;
 // Need to run `forge build` before `cargo build`.
 abigen!(IERC1271, "./out/IERC1271.sol/IERC1271.json");
 
-fn to_signature(i: u64) -> Bytes {
-    let signature: Vec<u8> = format!("{}", i).as_bytes().into();
-    Bytes::from(signature)
+fn to_signature(i: u32) -> Bytes {
+    let mut hex = format!("{:x}", i);
+    if hex.len() % 2 == 1 {hex = format!("0{hex}");}
+    hex.parse().unwrap()
 }
 
 fn abi_encode(hash: [u8; 32], signature: Bytes) -> Vec<u8> {
@@ -29,7 +30,7 @@ fn main() {
             .try_into()
             .unwrap();
 
-    let res = (0..u64::MAX).into_par_iter().find_any(|i| {
+    let res = (0..u32::MAX).into_par_iter().find_any(|i| {
         let signature = to_signature(*i);
         let digest = digest_bytes(&abi_encode(hash, signature));
         // >>> cast sig "isValidSignature(bytes32,bytes)"
