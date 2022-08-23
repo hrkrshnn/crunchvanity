@@ -5,7 +5,16 @@ forge build
 cargo run --release
 ```
 
-Runs in around 3 minutes on an "AMD Ryzen 9 5950X" machine with the following output.
+Runs in less than 2 minutes on an "AMD Ryzen 9 5950X" machine with the following output.
+
+```
+i: 4899916394756173557
+signature: 0x34383939393136333934373536313733353537
+ABI encoding: "1626ba7e19bb34e293bba96bf0caeea54cdd3d2dad7fdf44cbea855173fa84534fcfb528000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000133438393939313633393437353631373335353700000000000000000000000000"
+sha256: 1626ba7ee0b412a0906ef047f455a6b2a4116c0dbd20ac47caf350c913044e29
+```
+
+In a previous implementation, it produced the following:
 
 ```
 i: 3530822108198443567
@@ -14,4 +23,15 @@ ABI encoding: "1626ba7e19bb34e293bba96bf0caeea54cdd3d2dad7fdf44cbea855173fa84534
 sha256: 1626ba7ee4d51fc0ebbbe277ee6a4093bafbeebd091f739897f29ebec25f476a
 ```
 
+The branch in [#2](https://github.com/hrkrshnn/crunchvanity/pull/2) by [@shuklaayush](https://github.com/shuklaayush) is able to produce a shorter solution:
+
+```
+i: 2364647611
+signature: 0x8cf1a8bb
+ABI encoding: "1626ba7e19bb34e293bba96bf0caeea54cdd3d2dad7fdf44cbea855173fa84534fcfb528000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000048cf1a8bb00000000000000000000000000000000000000000000000000000000"
+sha256: 1626ba7e11c9fdc6c495f346beb65e2f712676389ec7733846f0457a36113dc1
+```
+
 Note: running the search from `0` to `UINT32_MAX` did not find the number--`UINT64_MAX` is really needed.
+
+Thanks to [@mattsse](https://github.com/mattsse) for speeding this from ~3 minutes to less than 2 minutes!
